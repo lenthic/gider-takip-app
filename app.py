@@ -43,8 +43,13 @@ class GiderTakip:
         df.to_csv("giderler.csv", index=False, encoding='utf-8-sig')
 
     def gider_ekle(self, gider):
+        if gider.miktar <= 0:
+            st.error("Gider miktarı pozitif bir değer olmalıdır.")
+            return False
         self.giderler.append(gider)
         self.csvye_kaydet()
+        return True
+
 
     def gider_sil(self, index):
         if 0 <= index < len(self.giderler):
@@ -55,6 +60,10 @@ class GiderTakip:
             st.error("Geçersiz indeks.")
 
     def gider_guncelle(self, index, yeni_tarih, yeni_aciklama, yeni_miktar, yeni_kategori):
+        if yeni_miktar <= 0:
+            st.error("Gider miktarı pozitif bir değer olmalıdır.")
+            return
+
         if 0 <= index < len(self.giderler):
             self.giderler[index].tarih = yeni_tarih
             self.giderler[index].aciklama = yeni_aciklama
@@ -64,6 +73,7 @@ class GiderTakip:
             st.success("Gider başarıyla güncellendi.")
         else:
             st.error("Geçersiz gider seçimi.")
+
 
     def giderleri_goster(self):
         if not self.giderler:
@@ -275,11 +285,16 @@ def main():
             if submit:
                 try:
                     miktar_float = float(miktar)
-                    yeni_gider = Gider(tarih.strftime("%d-%m-%Y"), aciklama, miktar_float, kategori)
-                    takip.gider_ekle(yeni_gider)
-                    st.success("Gider başarıyla eklendi.")
+                    if miktar_float <= 0:
+                        st.error("Miktar pozitif bir sayı olmalıdır.")
+                    else:
+                        yeni_gider = Gider(tarih.strftime("%d-%m-%Y"), aciklama, miktar_float, kategori)
+                        basarili = takip.gider_ekle(yeni_gider)
+                        if basarili:
+                            st.success("Gider başarıyla eklendi.")
                 except ValueError:
                     st.error("Miktar geçerli bir sayı olmalı.")
+
 
 
     elif secim == "Giderleri Göster":
